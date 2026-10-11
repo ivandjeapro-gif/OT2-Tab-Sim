@@ -46,6 +46,8 @@ class _DemoAppState extends State<_DemoApp> {
   @override
   void initState() {
     super.initState();
+    // Ouvre l'audio pendant le premier geste utilisateur sur l'ecran DT,
+    // avant que le GPS simule declenche l'alerte sonore.
     // Mode demo offroad : parcours fictif + GPS simule qui sort de route.
     _session.ouvrirBase(demoOffroad: true).then((_) {
       if (mounted) setState(() => _pret = true);

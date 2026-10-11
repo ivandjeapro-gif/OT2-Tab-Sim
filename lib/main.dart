@@ -6,7 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
 
-import 'screens/splash_screen.dart';
+import 'screens/dt_screen.dart';
 import 'state/session.dart';
 import 'theme/app_theme.dart';
 
@@ -40,6 +40,15 @@ class OreApp extends StatefulWidget {
 
 class _OreAppState extends State<OreApp> {
   final Session _session = Session();
+  late final Future<void> _initialisation;
+
+  @override
+  void initState() {
+    super.initState();
+    // Lancer directement le scénario de simulation : pas de splash ni d'étape
+    // de connexion. Le GPS offroad démarre dès que la base est prête.
+    _initialisation = _session.ouvrirBase(demoOffroad: true);
+  }
 
   @override
   void dispose() {
@@ -62,7 +71,16 @@ class _OreAppState extends State<OreApp> {
         title: 'ORE Tracking',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.light,
-        home: SplashScreen(session: _session),
+        home: FutureBuilder<void>(
+          future: _initialisation,
+          builder: (context, snapshot) => snapshot.connectionState ==
+                  ConnectionState.done
+              ? DtScreen(session: _session)
+              : const Scaffold(
+                  backgroundColor: AppColors.paper,
+                  body: Center(child: CircularProgressIndicator()),
+                ),
+        ),
       ),
     );
   }

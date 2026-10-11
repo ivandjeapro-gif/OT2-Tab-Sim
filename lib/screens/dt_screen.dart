@@ -15,15 +15,20 @@ class DtScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ProfileShell(
-      session: session,
-      body: ListenableBuilder(
-        listenable: session,
-        builder: (context, _) {
-          // Tout est lu ici, dans le builder : une taille de fenetre ou une
-          // valeur de session changee ailleurs doit etre retrouvee a ce
-          // niveau, pas figee au dernier build de l'ecran.
-          final MiseEnPage mise = MiseEnPage.depuis(context);
+    // Premier geste sur l'ecran = deverrouillage du contexte audio navigateur.
+    // Si une alerte GPS est deja arrivee, AlerteSysteme rejoue alors le bip et
+    // prononce le message mis en attente.
+    return Listener(
+      onPointerDown: (_) => session.alerter.deverrouillerAudioWeb(),
+      child: ProfileShell(
+        session: session,
+        body: ListenableBuilder(
+          listenable: session,
+          builder: (context, _) {
+            // Tout est lu ici, dans le builder : une taille de fenetre ou une
+            // valeur de session changee ailleurs doit etre retrouvee a ce
+            // niveau, pas figee au dernier build de l'ecran.
+            final MiseEnPage mise = MiseEnPage.depuis(context);
 
           // Marge commune aux trois ecrans profils : les blocs commencent
           // aux memes coordonnees quel que soit l'ecran.
@@ -101,7 +106,8 @@ class DtScreen extends StatelessWidget {
               },
             ),
           );
-        },
+          },
+        ),
       ),
     );
   }
@@ -399,22 +405,6 @@ class _TopBar extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Test direct de la voix off : deverrouille l'audio du
-                // navigateur web (autoplay policy) puis fait parler le TTS.
-                // Utile des l'arrivee sur l'ecran, sans attendre une alerte.
-                IconButton(
-                  tooltip: 'Tester la voix off',
-                  icon: Icon(
-                    Icons.volume_up,
-                    size: 26 * k,
-                    color: AppColors.ink,
-                  ),
-                  onPressed: () async {
-                    session.alerter.deverrouillerAudioWeb();
-                    await session.alerter
-                        .dire('Test de la voix off, alerte trajet operationnelle');
-                  },
-                ),
                 SizedBox(width: 6 * k),
                 BleStatusBadge(
                   etat: session.etatBleAffiche,

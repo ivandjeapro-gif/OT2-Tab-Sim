@@ -790,18 +790,18 @@ class Session extends ChangeNotifier {
     notifyListeners();
 
     final bool actif = alerteActive;
-    if (actif) alerter.jouer();
 
     if (actif != _alerteActive) {
       _alerteActive = actif;
       if (actif) {
-        // Front montant : le journal raconte l'entree en alerte, et la voix
-        // off lit le message affiche (le bip, lui, a deja sonne ci-dessus).
+        // Front montant : bip + voix démarrent ensemble, puis la voix est
+        // répétée toutes les 2 s pendant que le rappel d'alerte reste actif.
         push('Alerte trajet - $alerteCourante');
         unawaited(alerter.dire(alerteCourante));
         return; // push a deja notifie les ecrans.
       }
-      // Retour au calme : la voix off confirme le retour sur parcours.
+      // Retour au calme : arrêter les rappels, puis confirmer le retour.
+      alerter.arreterRappelVocal();
       unawaited(alerter.dire('Retour sur le parcours, bonne route'));
       notifyListeners();
     } else if (actif) {

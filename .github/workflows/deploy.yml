@@ -1,9 +1,6 @@
 name: Deploy simulation web
-
-# Build l'app Flutter pour le web et la publie sur GitHub Pages
-# a chaque push sur main. L'app est ensuite accessible sur :
-#   https://ivandjeapro-gif.github.io/OT2-Tab-Sim/
-
+# Build l'application Flutter Web sur chaque push main, puis publie sur Pages.
+# https://ivandjeapro-gif.github.io/OT2-Tab-Sim/
 on:
   push:
     branches: [main]
@@ -13,32 +10,25 @@ permissions:
   contents: read
   pages: write
   id-token: write
-
 concurrency:
   group: pages
   cancel-in-progress: true
-
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
           cache: true
-
       - run: flutter pub get
-
-      # --base-href obligatoire car l'app est servie dans un sous-dossier
-      # (/OT2-Tab-Sim/) de github.io, pas a la racine.
+      # L'application est hébergée dans /OT2-Tab-Sim/, pas à la racine.
       - run: flutter build web --release --base-href /OT2-Tab-Sim/
 
       - uses: actions/upload-pages-artifact@v3
         with:
           path: build/web
-
   deploy:
     needs: build
     runs-on: ubuntu-latest
